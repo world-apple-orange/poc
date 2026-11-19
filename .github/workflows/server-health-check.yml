@@ -6,13 +6,19 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug secrets
+        run: |
+          [ -n "${{ secrets.SERVER_HOST }}" ] && echo "HOST ok" || echo "HOST missing"
+          [ -n "${{ secrets.SERVER_USER }}" ] && echo "USER ok" || echo "USER missing"
+          [ -n "${{ secrets.SSH_PRIVATE_KEY }}" ] && echo "KEY ok" || echo "KEY missing"
+
       - name: Check CPU, memory, disk
-        uses: appleboy/ssh-action@v1          # Pre-built action that handles the SSH key setup
+        uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.SERVER_HOST }}       # Server IP or hostname
-          username: ${{ secrets.SERVER_USER }}   # Login user
-          key: ${{ secrets.SSH_PRIVATE_KEY }}    # Private key from secrets
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            uptime      # CPU load
-            free -h     # Memory
-            df -h /     # Disk
+            uptime
+            free -h
+            df -h /
