@@ -1,23 +1,18 @@
-name: Server Health Check            # Name shown in the Actions tab
+name: Server Health Check
 
-on: workflow_dispatch                # Run manually with the "Run workflow" button
+on: workflow_dispatch
 
 jobs:
-  check:                             # Job name (any name you like)
-    runs-on: ubuntu-latest           # GitHub gives you a fresh Ubuntu machine
-
+  check:
+    runs-on: ubuntu-latest
     steps:
-      - name: Add SSH key
-        run: |
-          mkdir -p ~/.ssh                                          # Create the SSH folder
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519  # Write the private key from the secret to a file
-          chmod 600 ~/.ssh/id_ed25519                              # Only the owner can read it (SSH requires this)
-          ssh-keyscan ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts  # Trust the server's fingerprint so SSH doesn't prompt
-
       - name: Check CPU, memory, disk
-        run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
-            uptime;    # CPU load averages (1, 5, 15 min)
-            free -h;   # Memory used/free in human-readable units
-            df -h /    # Disk usage of the root partition
-          "
+        uses: appleboy/ssh-action@v1          # Pre-built action that handles the SSH key setup
+        with:
+          host: ${{ secrets.SERVER_HOST }}       # Server IP or hostname
+          username: ${{ secrets.SERVER_USER }}   # Login user
+          key: ${{ secrets.SSH_PRIVATE_KEY }}    # Private key from secrets
+          script: |
+            uptime      # CPU load
+            free -h     # Memory
+            df -h /     # Disk
